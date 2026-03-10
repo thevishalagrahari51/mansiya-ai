@@ -3,201 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>MANSIYA - AI Intelligence</title>
+    <title>MANSIYA - The Ultimate AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
-        
-        body { 
-            background-color: #fcfcfd; 
-            color: #1a1c1e; 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            height: 100dvh; 
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden; 
-        }
-
-        /* Premium UI Elements */
-        .glass-nav { 
-            background: rgba(255, 255, 255, 0.8); 
-            backdrop-filter: blur(20px); 
-            border-bottom: 1px solid rgba(0,0,0,0.05); 
-        }
-        
-        .chat-wrapper { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 24px 16px; 
-            scroll-behavior: smooth; 
-        }
-
-        .msg-container { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 16px; 
-            max-width: 800px; 
-            margin: 0 auto; 
-        }
-
-        .bubble { 
-            max-width: 85%; 
-            padding: 14px 20px; 
-            font-size: 15px; 
-            line-height: 1.6; 
-            border-radius: 22px; 
-            position: relative;
-            transition: all 0.2s ease;
-        }
-
-        .user-bubble { 
-            background: #007aff; 
-            color: white; 
-            align-self: flex-end; 
-            border-bottom-right-radius: 4px;
-            box-shadow: 0 4px 15px rgba(0, 122, 255, 0.2); 
-        }
-
-        .ai-bubble { 
-            background: #ffffff; 
-            color: #1a1c1e; 
-            align-self: flex-start; 
-            border-bottom-left-radius: 4px;
-            border: 1px solid #f1f3f5;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03); 
-        }
-
-        /* Input Area */
-        .input-bar-container { 
-            background: #ffffff; 
-            padding: 20px; 
-            border-top: 1px solid #f1f3f5; 
-        }
-
-        .input-box { 
-            max-width: 800px; 
-            margin: 0 auto; 
-            background: #f1f3f5; 
-            border-radius: 30px; 
-            display: flex; 
-            align-items: center; 
-            padding: 6px 6px 6px 20px;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-        }
-
-        .input-box:focus-within { 
-            background: #ffffff; 
-            border-color: #007aff; 
-            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1); 
-        }
-
-        input { 
-            flex: 1; 
-            background: transparent; 
-            border: none; 
-            outline: none; 
-            font-size: 15px; 
-            color: #1a1c1e; 
-        }
-
-        .send-btn { 
-            background: #007aff; 
-            color: white; 
-            width: 44px; 
-            height: 44px; 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .send-btn:hover { transform: scale(1.05); background: #0066d6; }
-
-        /* Animations */
-        @keyframes slideIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-        .bubble { animation: slideIn 0.3s ease-out forwards; }
-
-        .thinking { display: none; text-align: center; color: #007aff; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-
-        /* Admin UI */
-        #admin-panel { background: #ffffff; z-index: 100; box-shadow: 0 -20px 50px rgba(0,0,0,0.1); border-radius: 40px 40px 0 0; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+        body { background: #f9fafb; font-family: 'Plus Jakarta Sans', sans-serif; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        .chat-area { flex: 1; overflow-y: auto; padding: 20px; scroll-behavior: smooth; }
+        .bubble { max-width: 85%; padding: 12px 16px; border-radius: 20px; font-size: 15px; line-height: 1.5; margin-bottom: 15px; animation: fadeIn 0.3s ease; }
+        .user-bubble { background: #007aff; color: white; align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 4px 10px rgba(0, 122, 255, 0.2); }
+        .ai-bubble { background: white; border: 1px solid #e5e7eb; align-self: flex-start; border-bottom-left-radius: 4px; color: #1f2937; }
+        .input-container { background: white; border-top: 1px solid #eee; padding: 15px; }
+        .input-wrapper { background: #f3f4f6; border-radius: 30px; display: flex; align-items: center; padding: 5px 5px 5px 15px; }
+        input { flex: 1; background: transparent; border: none; outline: none; padding: 10px; font-size: 14px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .loader { display: none; text-align: center; font-size: 10px; font-weight: bold; color: #007aff; letter-spacing: 1px; margin-bottom: 5px; }
     </style>
 </head>
 <body>
 
-    <!-- Header / Nav -->
-    <nav class="glass-nav p-4 sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-blue-100">
-                    <i class="fas fa-brain"></i>
-                </div>
-                <div>
-                    <h1 class="text-base font-bold tracking-tight">MANSIYA<span class="text-blue-600">AI</span></h1>
-                    <div class="flex items-center gap-1.5">
-                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                        <span id="st" class="text-[10px] text-gray-500 font-semibold uppercase">System Live</span>
-                    </div>
-                </div>
+    <!-- Nav Bar -->
+    <nav class="bg-white/80 backdrop-blur-md p-4 flex justify-between items-center border-b sticky top-0 z-10">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg"><i class="fas fa-robot"></i></div>
+            <div>
+                <h1 class="text-lg font-bold">MANSIYA<span class="text-blue-600 italic text-sm">PRO</span></h1>
+                <p id="st" class="text-[9px] text-gray-400 font-bold uppercase">Family Intelligence</p>
             </div>
-            <div id="u-box">
-                <button onclick="doLogin()" class="bg-gray-900 text-white px-5 py-2 rounded-full text-[11px] font-bold shadow-sm active:scale-95 transition">Login</button>
-            </div>
+        </div>
+        <div id="u-box" class="flex items-center gap-2">
+            <button onclick="login()" class="text-xs font-bold bg-gray-100 px-4 py-2 rounded-full">Login</button>
         </div>
     </nav>
 
     <!-- Chat Area -->
-    <div id="chat-win" class="chat-wrapper">
-        <div class="msg-container" id="msg-list">
-            <div class="ai-bubble bubble">
-                <p class="font-bold text-[10px] text-blue-600 mb-1">MANSIYA CORE</p>
-                Namaste Vishal ji! Main MANSIYA AI hoon. Sabse pehle login karein taaki main hamari chat history save kar sakoon. Poochiye main aapki kya madad kar sakti hoon?
-            </div>
+    <div id="chat-win" class="chat-area flex flex-col" id="msg-list">
+        <div class="ai-bubble bubble shadow-sm">
+            <p class="text-[10px] font-bold text-blue-600 mb-1">MANSIYA SYSTEM</p>
+            Namaste Vishal ji! Main ab <b>PDF Padne</b>, <b>Internet Search</b> karne aur <b>Galat Bhasha</b> ko rokne mein saksham hoon. Poochiye kya poochna hai!
         </div>
     </div>
 
-    <!-- Input Bar -->
-    <div class="input-bar-container">
-        <div id="wait" class="thinking">AI is processing pulse...</div>
-        <div class="input-box">
-            <input type="text" id="u-in" placeholder="Type a message..." autocomplete="off">
-            <button id="send" class="send-btn shadow-lg">
-                <i class="fas fa-arrow-up"></i>
-            </button>
+    <!-- Input Area -->
+    <div class="input-container">
+        <div id="wait" class="loader uppercase animate-pulse">Mansiya is searching pulse...</div>
+        <div class="max-w-4xl mx-auto flex gap-2">
+            <div class="input-wrapper flex-1">
+                <input type="text" id="u-in" placeholder="Ask or Teach me..." autocomplete="off">
+                <button id="send" class="bg-blue-600 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md active:scale-90 transition"><i class="fas fa-arrow-up"></i></button>
+            </div>
+            <!-- PDF Upload Button (Only for Admin) -->
+            <label id="pdf-btn" class="hidden w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-200 transition">
+                <i class="fas fa-file-pdf text-red-500"></i>
+                <input type="file" id="pdf-file" class="hidden" accept=".pdf">
+            </label>
         </div>
-        <p class="text-center text-[10px] text-gray-400 mt-4 font-medium uppercase tracking-widest">Designed by Vishal for Mansiya & Siya</p>
     </div>
 
-    <!-- Admin Floating Button -->
-    <div id="adm-btn" class="hidden fixed bottom-32 right-8">
-        <button onclick="shAdm()" class="w-14 h-14 bg-white border border-gray-100 rounded-2xl shadow-2xl flex items-center justify-center text-red-500 active:scale-90 transition">
-            <i class="fas fa-shield-halved text-xl"></i>
-        </button>
+    <!-- Admin Tools -->
+    <div id="adm-btn" class="hidden fixed bottom-28 right-6">
+        <button onclick="toggleAdmin()" class="w-14 h-14 bg-white shadow-2xl rounded-2xl flex items-center justify-center text-red-500 border border-gray-100"><i class="fas fa-cog"></i></button>
     </div>
 
-    <!-- Admin Modal -->
-    <div id="adm-pan" class="hidden fixed inset-x-0 bottom-0 top-20 p-8 overflow-y-auto translate-y-full transition-transform duration-500">
-        <div class="max-w-2xl mx-auto">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-2xl font-bold">Neural Training Hub</h2>
-                <button onclick="shAdm()" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-xl">&times;</button>
-            </div>
-            <div class="space-y-6">
-                <div class="group">
-                    <label class="text-[11px] font-bold text-gray-400 uppercase ml-2">Question Pattern</label>
-                    <input type="text" id="t-q" placeholder="What will the user ask?" class="w-full bg-gray-50 p-4 border-none rounded-2xl mt-1 outline-none focus:ring-2 ring-blue-500 transition">
-                </div>
-                <div class="group">
-                    <label class="text-[11px] font-bold text-gray-400 uppercase ml-2">Desired AI Response</label>
-                    <textarea id="t-a" placeholder="What should Mansiya reply?" class="w-full bg-gray-50 p-4 border-none rounded-2xl mt-1 outline-none focus:ring-2 ring-blue-500 transition h-40"></textarea>
-                </div>
-                <button onclick="saveT()" class="w-full bg-blue-600 text-white p-5 rounded-3xl font-bold shadow-xl shadow-blue-100 hover:bg-blue-700 transition">SAVE TO MEMORY</button>
-            </div>
+    <div id="adm-pan" class="hidden fixed inset-0 bg-white z-50 p-6 overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold">Training Command Center</h2>
+            <button onclick="toggleAdmin()" class="text-3xl text-gray-300">&times;</button>
+        </div>
+        <div class="space-y-4">
+            <p class="text-xs text-gray-500 font-bold uppercase">Manual Training</p>
+            <input type="text" id="t-q" placeholder="Enter Question Pattern" class="w-full p-4 border rounded-2xl outline-none focus:ring-2 ring-blue-500">
+            <textarea id="t-a" placeholder="Enter Proper Response" class="w-full p-4 border rounded-2xl h-40 outline-none focus:ring-2 ring-blue-500"></textarea>
+            <button onclick="saveManual()" class="w-full bg-blue-600 text-white p-5 rounded-2xl font-bold shadow-xl">Commit to Memory</button>
         </div>
     </div>
 
@@ -206,126 +85,142 @@
         const _U = 'https://enstvtympgcnhbbdcdfa.supabase.co';
         const _K = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVuc3R2dHltcGdjbmhiYmRjZGZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxMzIwNjUsImV4cCI6MjA4ODcwODA2NX0.5fhbAcr0sVeH5xZsd6rOXqxGCn1ADIs0U-zW2J9JMeM';
         const _G = 'AIzaSyDQfCt6dIqPokdSivlY2uNre-gkzhxdLqM';
+        const _T = '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';
 
         const _sb = window.supabase.createClient(_U, _K);
         let _u = null;
 
-        // Login Logic
-        async function doLogin() {
-            const { error } = await _sb.auth.signInWithOAuth({ 
-                provider: 'google', 
-                options: { redirectTo: window.location.origin } 
-            });
-            if(error) alert("Supabase Login Failed. Check Google Provider Settings.");
+        // PDF JS Config
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+        // 1. Safety Filter (Bad words list)
+        const badWords = ["gali", "toxic", "haram", "badword1", "badword2"]; // Aap aur jodein
+        function isSafe(text) {
+            return !badWords.some(word => text.toLowerCase().includes(word));
         }
 
-        async function doLogout() {
-            await _sb.auth.signOut();
-            window.location.reload();
+        // 2. Login & Auth
+        async function login() {
+            await _sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
         }
 
-        // Auth Listener
         _sb.auth.onAuthStateChange((ev, ses) => {
             if (ses) {
                 _u = ses.user;
-                document.getElementById('st').innerText = "Live: " + _u.user_metadata.full_name;
-                document.getElementById('u-box').innerHTML = `
-                    <div class="flex items-center gap-3 bg-gray-50 p-1.5 pr-4 rounded-full border border-gray-100">
-                        <img src="${_u.user_metadata.avatar_url}" class="w-8 h-8 rounded-full shadow-sm cursor-pointer" onclick="doLogout()" title="Click to Logout">
-                        <span class="text-[11px] font-bold text-gray-600">${_u.user_metadata.full_name.split(' ')[0]}</span>
-                    </div>`;
-                
-                if(_u.email === 'pancardonline51@gmail.com') document.getElementById('adm-btn').classList.remove('hidden');
+                document.getElementById('u-box').innerHTML = `<img src="${_u.user_metadata.avatar_url}" class="w-10 h-10 rounded-full border shadow-sm">`;
+                if(_u.email === 'pancardonline51@gmail.com') {
+                    document.getElementById('adm-btn').classList.remove('hidden');
+                    document.getElementById('pdf-btn').classList.remove('hidden');
+                }
                 loadHist();
             }
         });
 
-        // Chat Logic
+        // 3. PDF Reading Logic
+        document.getElementById('pdf-file').onchange = async (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = async function() {
+                const typedarray = new Uint8Array(this.result);
+                const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                let fullText = "";
+                for(let i=1; i<=pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    fullText += textContent.items.map(item => item.str).join(" ");
+                }
+                // Save PDF text to Supabase
+                await _sb.from('pdf_knowledge').insert([{ file_name: file.name, content: fullText, added_by: _u.email }]);
+                alert("MANSIYA ne PDF padh liya aur gyan badha liya!");
+            };
+            reader.readAsArrayBuffer(file);
+        };
+
+        // 4. Main Chat Logic
         async function ask() {
-            const i = document.getElementById('u-in');
-            const t = i.value.trim();
-            if(!t) return;
-            i.value = '';
-            addM(t, 'user');
+            const input = document.getElementById('u-in');
+            const txt = input.value.trim();
+            if(!txt) return;
+
+            if(!isSafe(txt)) {
+                addM("Kripya ashabhya bhasha ka prayog na karein. Main ye nahi seekh sakti.", 'ai');
+                input.value = ''; return;
+            }
+
+            input.value = '';
+            addM(txt, 'user');
             document.getElementById('wait').style.display = 'block';
 
             try {
-                // 1. Database Check
-                const { data: br } = await _sb.from('ai_knowledge').select('*').ilike('question', `%${t}%`);
-                let ans = "";
+                // Step A: Check Manual Training
+                const { data: br } = await _sb.from('ai_knowledge').select('*').ilike('question', `%${txt}%`);
                 
+                // Step B: Check PDF Knowledge
+                const { data: pdfK } = await _sb.from('pdf_knowledge').select('content').ilike('content', `%${txt}%`).limit(1);
+
+                let ans = "";
                 if (br && br.length > 0) {
                     ans = br[0].answer;
                 } else {
-                    // 2. Gemini 1.5 Flash Call (Fixed Request Structure)
+                    // Step C: Web Search (if needed)
+                    let searchRes = "";
+                    if(txt.length > 10) {
+                        const s = await fetch('https://api.tavily.com/search', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ api_key: _T, query: txt })
+                        });
+                        const sData = await s.json();
+                        searchRes = JSON.stringify(sData.results);
+                    }
+
+                    // Step D: Call Gemini
+                    const context = pdfK ? `Context from PDF: ${pdfK[0].content.substring(0, 1000)}` : "";
                     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${_G}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            contents: [{
-                                parts: [{ text: `You are MANSIYA-AI, a very friendly and intelligent bilingual assistant for Vishal's family. Answer this question: ${t}` }]
-                            }]
+                            contents: [{ parts: [{ text: `System: You are MANSIYA-AI, friendly bilingual assistant for Vishal's family. ${context}. Web Search: ${searchRes}. User Question: ${txt}. Rules: Be polite, use Hindi/English.` }] }]
                         })
                     });
                     const d = await r.json();
-                    if(d.candidates && d.candidates[0].content && d.candidates[0].content.parts) {
-                        ans = d.candidates[0].content.parts[0].text;
-                    } else {
-                        ans = "Main abhi thoda vyast hoon, kripya thodi der baad koshish karein.";
-                        console.error("Gemini Response Error:", d);
-                    }
+                    ans = d.candidates[0].content.parts[0].text;
                 }
+                
+                if(!isSafe(ans)) ans = "Maaf kijiye, main is sawal ka jawab nahi de sakti.";
                 addM(ans, 'ai');
-                if(_u) saveM(t, ans);
+                if(_u) saveChat(txt, ans);
+
             } catch (e) {
-                addM("Network busy! Connection establish nahi ho pa raha.", 'ai');
+                addM("Mukhya dimaag se sampark nahi ho paa raha. Kripya punah prayas karein.", 'ai');
             }
             document.getElementById('wait').style.display = 'none';
         }
 
         function addM(t, s) {
-            const w = document.getElementById('msg-list');
+            const win = document.getElementById('chat-win');
             const d = document.createElement('div');
-            d.className = s === 'user' ? 'user-bubble bubble' : 'ai-bubble bubble';
-            d.innerHTML = s === 'ai' ? `<p class="font-bold text-[10px] text-blue-600 mb-1 uppercase">Mansiya AI</p>${t}` : t;
-            w.appendChild(d);
-            
-            const container = document.getElementById('chat-win');
-            container.scrollTop = container.scrollHeight;
+            d.className = s === 'user' ? 'bubble user-bubble' : 'bubble ai-bubble shadow-sm';
+            d.innerHTML = s === 'ai' ? `<p class="text-[9px] font-bold text-blue-600 mb-1">MANSIYA</p>${t}` : t;
+            win.appendChild(d);
+            win.scrollTop = win.scrollHeight;
         }
 
-        async function saveM(u, a) {
-            if(!_u) return;
+        async function saveChat(u, a) {
             await _sb.from('messages').insert([{ user_email: _u.email, content: u, sender: 'user' }, { user_email: _u.email, content: a, sender: 'ai' }]);
         }
 
         async function loadHist() {
-            if(!_u) return;
-            const { data } = await _sb.from('messages').select('*').eq('user_email', _u.email).order('created_at', { ascending: true }).limit(50);
-            if(data && data.length > 0) {
-                document.getElementById('msg-list').innerHTML = '';
-                data.forEach(m => addM(m.content, m.sender));
-            }
+            const { data } = await _sb.from('messages').select('*').eq('user_email', _u.email).order('created_at', { ascending: true }).limit(20);
+            if(data) { document.getElementById('chat-win').innerHTML = ''; data.forEach(m => addM(m.content, m.sender)); }
         }
 
-        // Admin Actions
-        function shAdm() { 
-            const pan = document.getElementById('adm-pan');
-            if(pan.classList.contains('hidden')) {
-                pan.classList.remove('hidden');
-                setTimeout(() => pan.style.transform = "translateY(0)", 10);
-            } else {
-                pan.style.transform = "translateY(100%)";
-                setTimeout(() => pan.classList.add('hidden'), 500);
-            }
-        }
-
-        async function saveT() {
+        function toggleAdmin() { document.getElementById('adm-pan').classList.toggle('hidden'); }
+        async function saveManual() {
             const q = document.getElementById('t-q').value, a = document.getElementById('t-a').value;
-            if(!q || !a) return alert("Kripya dono fields bhariye!");
-            const { error } = await _sb.from('ai_knowledge').insert([{ question: q, answer: a }]);
-            if(!error) { alert("Brain memory updated!"); shAdm(); }
-            else { alert("DB Error: " + error.message); }
+            await _sb.from('ai_knowledge').insert([{ question: q, answer: a }]);
+            alert("Memory Updated!"); toggleAdmin();
         }
 
         document.getElementById('send').onclick = ask;
