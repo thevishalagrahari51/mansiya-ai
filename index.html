@@ -3,185 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>MANSIYA-AI | Global</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>MANSIYA-AI | Official</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
-        body { background: #f8fafc; color: #1e293b; font-family: 'Outfit', sans-serif; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
-        .glass-header { background: white; border-bottom: 1px solid #e2e8f0; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
-        .chat-container { flex: 1; overflow-y: auto; padding: 20px; background: #ffffff; }
-        .user-msg { background: #2563eb; color: white; align-self: flex-end; border-radius: 20px 20px 4px 20px; padding: 12px 18px; margin-bottom: 10px; max-width: 85%; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); }
-        .ai-msg { background: #f1f5f9; color: #334155; align-self: flex-start; border-radius: 20px 20px 20px 4px; padding: 12px 18px; margin-bottom: 10px; border: 1px solid #e2e8f0; max-width: 85%; }
-        .input-area { background: white; padding: 15px; border-top: 1px solid #e2e8f0; }
-        .input-container { border: 2px solid #f1f5f9; border-radius: 25px; transition: 0.3s; background: #f8fafc; }
-        .input-container:focus-within { border-color: #2563eb; background: white; }
-        .loader { display: none; font-size: 11px; color: #2563eb; font-weight: bold; margin-bottom: 8px; text-align: center; letter-spacing: 1px; }
+        body { background: #f1f5f9; color: #334155; font-family: 'Outfit', sans-serif; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        .chat-area { flex: 1; overflow-y: auto; padding: 20px; background: white; border-radius: 30px 30px 0 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.02); }
+        .msg { max-width: 85%; padding: 12px 18px; margin-bottom: 12px; font-size: 14px; line-height: 1.5; position: relative; }
+        .user-msg { background: #2563eb; color: white; align-self: flex-end; border-radius: 20px 20px 2px 20px; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); }
+        .ai-msg { background: #f8fafc; color: #1e293b; align-self: flex-start; border-radius: 20px 20px 20px 2px; border: 1px solid #e2e8f0; }
+        .input-bar { background: white; padding: 15px; border-top: 1px solid #e2e8f0; }
+        .box { border: 2px solid #f1f5f9; border-radius: 25px; background: #f8fafc; padding: 4px; }
+        .box:focus-within { border-color: #2563eb; background: white; }
     </style>
 </head>
 <body>
 
-    <!-- Header -->
-    <header class="p-4 glass-header flex justify-between items-center z-10">
+    <header class="p-4 flex justify-between items-center bg-white border-b border-gray-100">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg">
-                <i class="fas fa-robot text-lg"></i>
-            </div>
+            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg"><i class="fas fa-robot"></i></div>
             <div>
-                <h1 class="text-lg font-bold tracking-tight">MANSIYA<span class="text-blue-600">AI</span></h1>
-                <p id="online-status" class="text-[9px] text-green-500 font-bold uppercase tracking-widest">System Ready</p>
+                <h1 class="text-lg font-bold">MANSIYA<span class="text-blue-600">AI</span></h1>
+                <p id="st" class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Server Offline</p>
             </div>
         </div>
-        <div id="auth-ui">
-            <button onclick="handleLogin()" class="bg-blue-600 text-white px-5 py-2 rounded-full text-xs font-bold hover:bg-blue-700 transition shadow-md">Login</button>
-        </div>
+        <div id="u-box"><button onclick="doLogin()" class="bg-blue-600 text-white px-5 py-2 rounded-full text-xs font-bold shadow-md">Login</button></div>
     </header>
 
-    <!-- Chat Window -->
-    <div id="chat-box" class="chat-container flex flex-col">
-        <div class="ai-msg">
-            <p class="text-[9px] font-bold text-blue-600 mb-1 uppercase">Mansiya</p>
-            <p class="text-sm">Namaste! Main MANSIYA AI hoon. Sabse pehle login karein taaki hum baatchit shuru kar sakein. ❤️</p>
-        </div>
+    <div id="chat-win" class="chat-area flex flex-col">
+        <div class="ai-msg msg">Namaste Vishal ji! Main MANSIYA AI hoon. Kripya login karein baatchit ke liye. ❤️</div>
     </div>
 
-    <!-- Input Bar -->
-    <div class="input-area">
-        <div id="loader" class="loader">MANSIYA IS THINKING...</div>
-        <div class="max-w-4xl mx-auto flex gap-2 input-container p-1">
-            <input type="text" id="userInput" placeholder="Ask me anything..." class="flex-1 p-3 outline-none text-sm bg-transparent">
-            <button id="sendBtn" class="bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center hover:bg-blue-700 transition">
+    <div class="input-bar">
+        <div id="wait" class="hidden text-center text-[10px] text-blue-600 font-bold mb-2 animate-pulse uppercase">Mansiya is thinking...</div>
+        <div class="max-w-4xl mx-auto flex gap-2 box">
+            <input type="text" id="u-in" placeholder="Type here..." class="flex-1 p-3 outline-none text-sm bg-transparent">
+            <button id="send" class="bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center hover:bg-blue-700 transition">
                 <i class="fas fa-paper-plane"></i>
             </button>
         </div>
     </div>
 
-    <!-- Admin Floating Button -->
-    <div id="admin-shield" class="hidden fixed bottom-24 right-6">
-        <button onclick="toggleAdmin()" class="bg-red-500 w-12 h-12 rounded-full text-white shadow-2xl border-2 border-white">
-            <i class="fas fa-shield-alt"></i>
-        </button>
-    </div>
-
-    <!-- Admin Modal -->
-    <div id="admin-panel" class="hidden fixed inset-0 bg-white z-50 p-6 overflow-y-auto">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-xl font-bold">Admin: Train Mansiya</h2>
-            <button onclick="toggleAdmin()" class="text-3xl text-gray-400">&times;</button>
-        </div>
-        <div class="space-y-4">
-            <input type="text" id="t-q" placeholder="Enter Question" class="w-full p-4 border rounded-2xl outline-none focus:border-blue-500">
-            <textarea id="t-a" placeholder="Enter Ideal Answer" class="w-full p-4 border rounded-2xl h-32 outline-none focus:border-blue-500"></textarea>
-            <button onclick="saveTraining()" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-bold uppercase">Update AI Memory</button>
-        </div>
+    <!-- Admin Section -->
+    <div id="adm-btn" class="hidden fixed bottom-24 right-6"><button onclick="shAdm()" class="bg-red-500 w-12 h-12 rounded-full text-white shadow-2xl border-2 border-white"><i class="fas fa-shield-alt"></i></button></div>
+    <div id="adm-pan" class="hidden fixed inset-0 bg-white z-50 p-6 overflow-y-auto">
+        <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold">Training Hub</h2><button onclick="shAdm()" class="text-3xl">&times;</button></div>
+        <input type="text" id="t-q" placeholder="Question" class="w-full p-4 mb-3 border rounded-2xl outline-none"><textarea id="t-a" placeholder="Answer" class="w-full p-4 mb-3 border rounded-2xl h-32 outline-none"></textarea>
+        <button onclick="saveT()" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-bold uppercase">Save Brain</button>
     </div>
 
     <script>
-        // Use unique name to avoid "Already Declared" error
-        const _SURL = 'https://enstvtympgcnhbbdcdfa.supabase.co';
-        const _SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVuc3R2dHltcGdjbmhiYmRjZGZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxMzIwNjUsImV4cCI6MjA4ODcwODA2NX0.5fhbAcr0sVeH5xZsd6rOXqxGCn1ADIs0U-zW2J9JMeM';
-        const _GKEY = 'AIzaSyDQfCt6dIqPokdSivlY2uNre-gkzhxdLqM';
-        const _TKEY = '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';
+        // CONFIG
+        const _U = 'https://enstvtympgcnhbbdcdfa.supabase.co';
+        const _K = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVuc3R2dHltcGdjbmhiYmRjZGZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxMzIwNjUsImV4cCI6MjA4ODcwODA2NX0.5fhbAcr0sVeH5xZsd6rOXqxGCn1ADIs0U-zW2J9JMeM';
+        const _G = 'AIzaSyDQfCt6dIqPokdSivlY2uNre-gkzhxdLqM';
 
-        // Initialize Supabase correctly
-        const _client = window.supabase.createClient(_SURL, _SKEY);
-        let _user = null;
+        const _sb = window.supabase.createClient(_U, _K);
+        let _u = null;
 
-        // Login Logic
-        async function handleLogin() {
-            const { error } = await _client.auth.signInWithOAuth({ 
-                provider: 'google',
-                options: { redirectTo: window.location.origin }
-            });
-            if(error) alert("Login Fail: " + error.message);
+        async function doLogin() {
+            const { error } = await _sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
+            if(error) alert("Login Error: " + error.message);
         }
 
-        // Auth Listener
-        _client.auth.onAuthStateChange((event, session) => {
-            if (session) {
-                _user = session.user;
-                document.getElementById('auth-ui').innerHTML = `<img src="${_user.user_metadata.avatar_url}" class="w-10 h-10 rounded-full border-2 border-blue-600 shadow-md">`;
-                document.getElementById('online-status').innerText = "Active: " + _user.user_metadata.full_name;
-                
-                // Admin Email Check
-                if(_user.email === 'pancardonline51@gmail.com') {
-                    document.getElementById('admin-shield').classList.remove('hidden');
-                }
-                loadMessages();
+        _sb.auth.onAuthStateChange((ev, ses) => {
+            if (ses) {
+                _u = ses.user;
+                document.getElementById('st').innerText = "Live: " + _u.user_metadata.full_name;
+                document.getElementById('u-box').innerHTML = `<img src="${_u.user_metadata.avatar_url}" class="w-10 h-10 rounded-full border-2 border-blue-600">`;
+                if(_u.email === 'pancardonline51@gmail.com') document.getElementById('adm-btn').classList.remove('hidden');
+                loadHist();
             }
         });
 
-        // Chat Logic
-        async function handleChat() {
-            const inp = document.getElementById('userInput');
-            const txt = inp.value.trim();
-            if(!txt) return;
-
-            inp.value = '';
-            appendMsg(txt, 'user');
-            document.getElementById('loader').style.display = 'block';
+        async function ask() {
+            const i = document.getElementById('u-in');
+            const t = i.value.trim();
+            if(!t) return;
+            i.value = '';
+            addM(t, 'user');
+            document.getElementById('wait').classList.remove('hidden');
 
             try {
-                // 1. Check Admin Training
-                const { data: brain } = await _client.from('ai_knowledge').select('*').ilike('question', `%${txt}%`);
+                // 1. Check Brain Data
+                const { data: br } = await _sb.from('ai_knowledge').select('*').ilike('question', `%${t}%`);
+                let ans = "";
                 
-                let finalRes = "";
-                if (brain && brain.length > 0) {
-                    finalRes = brain[0].answer;
+                if (br && br.length > 0) {
+                    ans = br[0].answer;
                 } else {
-                    // 2. Search & Gemini
-                    const gRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${_GKEY}`, {
+                    // 2. Call Gemini
+                    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${_G}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: `You are MANSIYA-AI, friendly bilingual assistant. Created by Vishal. User Question: ${txt}` }] }] })
+                        body: JSON.stringify({ contents: [{ parts: [{ text: `You are MANSIYA-AI, friendly, bilingual. Created by Vishal. User Question: ${t}` }] }] })
                     });
-                    const gData = await gRes.json();
-                    finalRes = gData.candidates[0].content.parts[0].text;
+                    const d = await r.json();
+                    if(d.candidates) {
+                        ans = d.candidates[0].content.parts[0].text;
+                    } else {
+                        ans = "Gemini API Error: " + (d.error ? d.error.message : "CORS Blocked or Key Invalid");
+                    }
                 }
-                appendMsg(finalRes, 'ai');
-                saveMessage(txt, finalRes);
+                addM(ans, 'ai');
+                saveM(t, ans);
             } catch (e) {
-                appendMsg("System Busy. Please try again later.", 'ai');
+                addM("System Busy: Database or Browser blocked the connection.", 'ai');
                 console.error(e);
             }
-            document.getElementById('loader').style.display = 'none';
+            document.getElementById('wait').classList.add('hidden');
         }
 
-        function appendMsg(t, s) {
-            const box = document.getElementById('chat-box');
+        function addM(t, s) {
+            const w = document.getElementById('chat-win');
             const d = document.createElement('div');
-            d.className = s === 'user' ? 'user-msg shadow-sm' : 'ai-msg';
-            d.innerHTML = `<p class="text-[8px] font-bold uppercase mb-1 ${s === 'user' ? 'text-blue-100' : 'text-blue-600'}">${s === 'user' ? 'You' : 'Mansiya AI'}</p><p class="text-sm">${t}</p>`;
-            box.appendChild(d);
-            box.scrollTop = box.scrollHeight;
+            d.className = s === 'user' ? 'user-msg msg' : 'ai-msg msg';
+            d.innerHTML = `<p class="text-[8px] font-bold uppercase mb-1 ${s==='user'?'text-blue-100':'text-blue-600'}">${s==='user'?'Aap':'Mansiya'}</p><p>${t}</p>`;
+            w.appendChild(d);
+            w.scrollTop = w.scrollHeight;
         }
 
-        async function saveMessage(u, a) {
-            if(!_user) return;
-            await _client.from('messages').insert([{ user_email: _user.email, content: u, sender: 'user' }, { user_email: _user.email, content: a, sender: 'ai' }]);
+        async function saveM(u, a) {
+            if(!_u) return;
+            const { error } = await _sb.from('messages').insert([{ user_email: _u.email, content: u, sender: 'user' }, { user_email: _u.email, content: a, sender: 'ai' }]);
+            if(error) console.log("DB Save Error:", error.message);
         }
 
-        async function loadMessages() {
-            const { data } = await _client.from('messages').select('*').eq('user_email', _user.email).order('created_at', { ascending: true }).limit(20);
-            if(data) {
-                document.getElementById('chat-box').innerHTML = '';
-                data.forEach(m => appendMsg(m.content, m.sender));
-            }
+        async function loadHist() {
+            const { data } = await _sb.from('messages').select('*').eq('user_email', _u.email).order('created_at', { ascending: true });
+            if(data) { document.getElementById('chat-win').innerHTML = ''; data.forEach(m => addM(m.content, m.sender)); }
         }
 
-        function toggleAdmin() { document.getElementById('admin-panel').classList.toggle('hidden'); }
-        async function saveTraining() {
-            const q = document.getElementById('t-q').value;
-            const a = document.getElementById('t-a').value;
-            if(!q || !a) return alert("Fill both fields");
-            const { error } = await _client.from('ai_knowledge').insert([{ question: q, answer: a }]);
-            if(!error) { alert("Memory Saved!"); toggleAdmin(); }
+        function shAdm() { document.getElementById('adm-pan').classList.toggle('hidden'); }
+        async function saveT() {
+            const q = document.getElementById('t-q').value, a = document.getElementById('t-a').value;
+            await _sb.from('ai_knowledge').insert([{ question: q, answer: a }]);
+            alert("Seekh Liya!"); shAdm();
         }
 
-        document.getElementById('sendBtn').onclick = handleChat;
-        document.getElementById('userInput').onkeypress = (e) => { if(e.key === 'Enter') handleChat(); };
+        document.getElementById('send').onclick = ask;
+        document.getElementById('u-in').onkeypress = (e) => { if(e.key === 'Enter') ask(); };
     </script>
 </body>
 </html>
-
