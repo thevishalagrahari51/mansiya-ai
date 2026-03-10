@@ -3,78 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>MANSIYA-AI | Intelligence</title>
+    <title>MANSIYA - AI Intelligence</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
-        body { background: #f8fafc; color: #1e293b; font-family: 'Outfit', sans-serif; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
-        .chat-area { flex: 1; overflow-y: auto; padding: 20px; background: white; border-radius: 30px 30px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,0.02); }
-        .msg { max-width: 85%; padding: 12px 18px; margin-bottom: 12px; font-size: 14px; border-radius: 20px; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .user-msg { background: #2563eb; color: white; align-self: flex-end; border-radius: 20px 20px 2px 20px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
-        .ai-msg { background: #f1f5f9; color: #334155; align-self: flex-start; border-radius: 20px 20px 20px 2px; border: 1px solid #e2e8f0; }
-        .input-bar { background: white; padding: 15px; border-top: 1px solid #e2e8f0; }
-        .box { border: 2px solid #f1f5f9; border-radius: 25px; background: #f8fafc; padding: 4px; transition: 0.3s; }
-        .box:focus-within { border-color: #2563eb; background: white; box-shadow: 0 0 15px rgba(37, 99, 235, 0.1); }
-        .loader { display: none; font-size: 10px; color: #2563eb; font-weight: bold; text-align: center; margin-bottom: 8px; letter-spacing: 2px; }
-        .logout-btn { font-size: 10px; color: #ef4444; cursor: pointer; text-decoration: underline; margin-top: 2px; display: block; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        
+        body { 
+            background-color: #fcfcfd; 
+            color: #1a1c1e; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            height: 100dvh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+        }
+
+        /* Premium UI Elements */
+        .glass-nav { 
+            background: rgba(255, 255, 255, 0.8); 
+            backdrop-filter: blur(20px); 
+            border-bottom: 1px solid rgba(0,0,0,0.05); 
+        }
+        
+        .chat-wrapper { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 24px 16px; 
+            scroll-behavior: smooth; 
+        }
+
+        .msg-container { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 16px; 
+            max-width: 800px; 
+            margin: 0 auto; 
+        }
+
+        .bubble { 
+            max-width: 85%; 
+            padding: 14px 20px; 
+            font-size: 15px; 
+            line-height: 1.6; 
+            border-radius: 22px; 
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .user-bubble { 
+            background: #007aff; 
+            color: white; 
+            align-self: flex-end; 
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 15px rgba(0, 122, 255, 0.2); 
+        }
+
+        .ai-bubble { 
+            background: #ffffff; 
+            color: #1a1c1e; 
+            align-self: flex-start; 
+            border-bottom-left-radius: 4px;
+            border: 1px solid #f1f3f5;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03); 
+        }
+
+        /* Input Area */
+        .input-bar-container { 
+            background: #ffffff; 
+            padding: 20px; 
+            border-top: 1px solid #f1f3f5; 
+        }
+
+        .input-box { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: #f1f3f5; 
+            border-radius: 30px; 
+            display: flex; 
+            align-items: center; 
+            padding: 6px 6px 6px 20px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .input-box:focus-within { 
+            background: #ffffff; 
+            border-color: #007aff; 
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1); 
+        }
+
+        input { 
+            flex: 1; 
+            background: transparent; 
+            border: none; 
+            outline: none; 
+            font-size: 15px; 
+            color: #1a1c1e; 
+        }
+
+        .send-btn { 
+            background: #007aff; 
+            color: white; 
+            width: 44px; 
+            height: 44px; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .send-btn:hover { transform: scale(1.05); background: #0066d6; }
+
+        /* Animations */
+        @keyframes slideIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .bubble { animation: slideIn 0.3s ease-out forwards; }
+
+        .thinking { display: none; text-align: center; color: #007aff; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+
+        /* Admin UI */
+        #admin-panel { background: #ffffff; z-index: 100; box-shadow: 0 -20px 50px rgba(0,0,0,0.1); border-radius: 40px 40px 0 0; }
     </style>
 </head>
 <body>
 
-    <!-- Header -->
-    <header class="p-4 flex justify-between items-center bg-white border-b border-gray-50">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
-                <i class="fas fa-robot"></i>
+    <!-- Header / Nav -->
+    <nav class="glass-nav p-4 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-blue-100">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-bold tracking-tight">MANSIYA<span class="text-blue-600">AI</span></h1>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                        <span id="st" class="text-[10px] text-gray-500 font-semibold uppercase">System Live</span>
+                    </div>
+                </div>
             </div>
-            <div>
-                <h1 class="text-lg font-bold tracking-tight text-slate-800">MANSIYA<span class="text-blue-600">AI</span></h1>
-                <p id="st" class="text-[9px] text-green-500 font-bold uppercase tracking-widest">Active System</p>
+            <div id="u-box">
+                <button onclick="doLogin()" class="bg-gray-900 text-white px-5 py-2 rounded-full text-[11px] font-bold shadow-sm active:scale-95 transition">Login</button>
             </div>
         </div>
-        <div id="u-box" class="text-right">
-            <button onclick="doLogin()" class="bg-blue-600 text-white px-5 py-2 rounded-full text-[11px] font-bold shadow-md hover:bg-blue-700 transition">Login</button>
-        </div>
-    </header>
+    </nav>
 
-    <!-- Chat Window -->
-    <div id="chat-win" class="chat-area flex flex-col">
-        <div class="ai-msg msg">
-            <b>MANSIYA Protocol:</b><br>
-            Namaste Vishal ji! Main MANSIYA hoon. Sabse pehle login karein taaki main hamari chat history save kar sakoon.
+    <!-- Chat Area -->
+    <div id="chat-win" class="chat-wrapper">
+        <div class="msg-container" id="msg-list">
+            <div class="ai-bubble bubble">
+                <p class="font-bold text-[10px] text-blue-600 mb-1">MANSIYA CORE</p>
+                Namaste Vishal ji! Main MANSIYA AI hoon. Sabse pehle login karein taaki main hamari chat history save kar sakoon. Poochiye main aapki kya madad kar sakti hoon?
+            </div>
         </div>
     </div>
 
     <!-- Input Bar -->
-    <div class="input-bar">
-        <div id="wait" class="loader uppercase animate-pulse">Mansiya is processing...</div>
-        <div class="max-w-4xl mx-auto flex gap-2 box">
-            <input type="text" id="u-in" placeholder="Poochiye jo poochna hai..." class="flex-1 p-3 outline-none text-sm bg-transparent">
-            <button id="send" class="bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center hover:bg-blue-700 active:scale-90 transition shadow-lg">
-                <i class="fas fa-paper-plane"></i>
+    <div class="input-bar-container">
+        <div id="wait" class="thinking">AI is processing pulse...</div>
+        <div class="input-box">
+            <input type="text" id="u-in" placeholder="Type a message..." autocomplete="off">
+            <button id="send" class="send-btn shadow-lg">
+                <i class="fas fa-arrow-up"></i>
             </button>
         </div>
+        <p class="text-center text-[10px] text-gray-400 mt-4 font-medium uppercase tracking-widest">Designed by Vishal for Mansiya & Siya</p>
     </div>
 
-    <!-- Admin Section -->
-    <div id="adm-btn" class="hidden fixed bottom-24 right-6">
-        <button onclick="shAdm()" class="bg-red-500 w-14 h-14 rounded-full text-white shadow-2xl border-2 border-white">
-            <i class="fas fa-shield-alt text-xl"></i>
+    <!-- Admin Floating Button -->
+    <div id="adm-btn" class="hidden fixed bottom-32 right-8">
+        <button onclick="shAdm()" class="w-14 h-14 bg-white border border-gray-100 rounded-2xl shadow-2xl flex items-center justify-center text-red-500 active:scale-90 transition">
+            <i class="fas fa-shield-halved text-xl"></i>
         </button>
     </div>
 
-    <div id="adm-pan" class="hidden fixed inset-0 bg-white z-50 p-6 overflow-y-auto">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold">Training Memory Hub</h2>
-            <button onclick="shAdm()" class="text-3xl text-gray-400">&times;</button>
-        </div>
-        <div class="space-y-4">
-            <input type="text" id="t-q" placeholder="Enter Question" class="w-full p-4 border rounded-2xl outline-none focus:border-blue-500 bg-gray-50">
-            <textarea id="t-a" placeholder="Enter Ideal Answer" class="w-full p-4 border rounded-2xl h-40 outline-none focus:border-blue-500 bg-gray-50"></textarea>
-            <button onclick="saveT()" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-bold uppercase shadow-xl">Sikhayein AI ko</button>
+    <!-- Admin Modal -->
+    <div id="adm-pan" class="hidden fixed inset-x-0 bottom-0 top-20 p-8 overflow-y-auto translate-y-full transition-transform duration-500">
+        <div class="max-w-2xl mx-auto">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-bold">Neural Training Hub</h2>
+                <button onclick="shAdm()" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-xl">&times;</button>
+            </div>
+            <div class="space-y-6">
+                <div class="group">
+                    <label class="text-[11px] font-bold text-gray-400 uppercase ml-2">Question Pattern</label>
+                    <input type="text" id="t-q" placeholder="What will the user ask?" class="w-full bg-gray-50 p-4 border-none rounded-2xl mt-1 outline-none focus:ring-2 ring-blue-500 transition">
+                </div>
+                <div class="group">
+                    <label class="text-[11px] font-bold text-gray-400 uppercase ml-2">Desired AI Response</label>
+                    <textarea id="t-a" placeholder="What should Mansiya reply?" class="w-full bg-gray-50 p-4 border-none rounded-2xl mt-1 outline-none focus:ring-2 ring-blue-500 transition h-40"></textarea>
+                </div>
+                <button onclick="saveT()" class="w-full bg-blue-600 text-white p-5 rounded-3xl font-bold shadow-xl shadow-blue-100 hover:bg-blue-700 transition">SAVE TO MEMORY</button>
+            </div>
         </div>
     </div>
 
@@ -87,13 +210,13 @@
         const _sb = window.supabase.createClient(_U, _K);
         let _u = null;
 
-        // Login / Logout Logic
+        // Login Logic
         async function doLogin() {
             const { error } = await _sb.auth.signInWithOAuth({ 
                 provider: 'google', 
                 options: { redirectTo: window.location.origin } 
             });
-            if(error) alert("Supabase: Google Provider is not enabled in dashboard.");
+            if(error) alert("Supabase Login Failed. Check Google Provider Settings.");
         }
 
         async function doLogout() {
@@ -101,22 +224,19 @@
             window.location.reload();
         }
 
-        // Auth State Listener
+        // Auth Listener
         _sb.auth.onAuthStateChange((ev, ses) => {
             if (ses) {
                 _u = ses.user;
                 document.getElementById('st').innerText = "Live: " + _u.user_metadata.full_name;
                 document.getElementById('u-box').innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <img src="${_u.user_metadata.avatar_url}" class="w-10 h-10 rounded-full border-2 border-blue-600">
-                        <div class="text-left">
-                            <span class="text-[10px] font-bold block">${_u.user_metadata.full_name.split(' ')[0]}</span>
-                            <span onclick="doLogout()" class="logout-btn">Logout</span>
-                        </div>
+                    <div class="flex items-center gap-3 bg-gray-50 p-1.5 pr-4 rounded-full border border-gray-100">
+                        <img src="${_u.user_metadata.avatar_url}" class="w-8 h-8 rounded-full shadow-sm cursor-pointer" onclick="doLogout()" title="Click to Logout">
+                        <span class="text-[11px] font-bold text-gray-600">${_u.user_metadata.full_name.split(' ')[0]}</span>
                     </div>`;
                 
                 if(_u.email === 'pancardonline51@gmail.com') document.getElementById('adm-btn').classList.remove('hidden');
-                loadHist(); // Load History after login
+                loadHist();
             }
         });
 
@@ -130,43 +250,48 @@
             document.getElementById('wait').style.display = 'block';
 
             try {
-                // 1. Brain Memory Check
+                // 1. Database Check
                 const { data: br } = await _sb.from('ai_knowledge').select('*').ilike('question', `%${t}%`);
                 let ans = "";
                 
                 if (br && br.length > 0) {
                     ans = br[0].answer;
                 } else {
-                    // 2. Gemini 1.5 Flash Call (Fixed Payload)
+                    // 2. Gemini 1.5 Flash Call (Fixed Request Structure)
                     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${_G}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            contents: [{ parts: [{ text: `System: You are MANSIYA-AI, friendly bilingual assistant for Vishal's family. User Question: ${t}` }] }]
+                            contents: [{
+                                parts: [{ text: `You are MANSIYA-AI, a very friendly and intelligent bilingual assistant for Vishal's family. Answer this question: ${t}` }]
+                            }]
                         })
                     });
                     const d = await r.json();
-                    if(d.candidates && d.candidates[0].content) {
+                    if(d.candidates && d.candidates[0].content && d.candidates[0].content.parts) {
                         ans = d.candidates[0].content.parts[0].text;
                     } else {
-                        ans = "Gemini Model busy. Please try again or check API Key.";
+                        ans = "Main abhi thoda vyast hoon, kripya thodi der baad koshish karein.";
+                        console.error("Gemini Response Error:", d);
                     }
                 }
                 addM(ans, 'ai');
-                if(_u) saveM(t, ans); // Save only if logged in
+                if(_u) saveM(t, ans);
             } catch (e) {
-                addM("Network Error: Could not connect to AI brain.", 'ai');
+                addM("Network busy! Connection establish nahi ho pa raha.", 'ai');
             }
             document.getElementById('wait').style.display = 'none';
         }
 
         function addM(t, s) {
-            const w = document.getElementById('chat-win');
+            const w = document.getElementById('msg-list');
             const d = document.createElement('div');
-            d.className = s === 'user' ? 'user-msg msg shadow-md' : 'ai-msg msg';
-            d.innerHTML = `<p class="text-[8px] font-bold uppercase mb-1 ${s==='user'?'text-blue-100':'text-blue-600'}">${s==='user'?'Aap':'Mansiya'}</p><p>${t}</p>`;
+            d.className = s === 'user' ? 'user-bubble bubble' : 'ai-bubble bubble';
+            d.innerHTML = s === 'ai' ? `<p class="font-bold text-[10px] text-blue-600 mb-1 uppercase">Mansiya AI</p>${t}` : t;
             w.appendChild(d);
-            w.scrollTop = w.scrollHeight;
+            
+            const container = document.getElementById('chat-win');
+            container.scrollTop = container.scrollHeight;
         }
 
         async function saveM(u, a) {
@@ -174,23 +299,32 @@
             await _sb.from('messages').insert([{ user_email: _u.email, content: u, sender: 'user' }, { user_email: _u.email, content: a, sender: 'ai' }]);
         }
 
-        // Load Chat History from Database
         async function loadHist() {
             if(!_u) return;
-            const { data, error } = await _sb.from('messages').select('*').eq('user_email', _u.email).order('created_at', { ascending: true }).limit(30);
+            const { data } = await _sb.from('messages').select('*').eq('user_email', _u.email).order('created_at', { ascending: true }).limit(50);
             if(data && data.length > 0) {
-                document.getElementById('chat-win').innerHTML = ''; // Clear initial msg
+                document.getElementById('msg-list').innerHTML = '';
                 data.forEach(m => addM(m.content, m.sender));
             }
         }
 
         // Admin Actions
-        function shAdm() { document.getElementById('adm-pan').classList.toggle('hidden'); }
+        function shAdm() { 
+            const pan = document.getElementById('adm-pan');
+            if(pan.classList.contains('hidden')) {
+                pan.classList.remove('hidden');
+                setTimeout(() => pan.style.transform = "translateY(0)", 10);
+            } else {
+                pan.style.transform = "translateY(100%)";
+                setTimeout(() => pan.classList.add('hidden'), 500);
+            }
+        }
+
         async function saveT() {
             const q = document.getElementById('t-q').value, a = document.getElementById('t-a').value;
-            if(!q || !a) return alert("Fill both fields!");
+            if(!q || !a) return alert("Kripya dono fields bhariye!");
             const { error } = await _sb.from('ai_knowledge').insert([{ question: q, answer: a }]);
-            if(!error) { alert("Successfully Learned!"); shAdm(); }
+            if(!error) { alert("Brain memory updated!"); shAdm(); }
             else { alert("DB Error: " + error.message); }
         }
 
