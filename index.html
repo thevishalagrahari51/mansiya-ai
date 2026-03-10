@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>MANSIYA-AI | Live</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary: #00d2ff; --dark: #050505; }
+        body { background-color: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .chat-container { flex: 1; overflow-y: auto; padding: 20px; scroll-behavior: smooth; }
+        .user-msg { background: rgba(0, 210, 255, 0.1); border: 1px solid rgba(0, 210, 255, 0.2); border-radius: 20px 20px 0 20px; padding: 12px; max-width: 85%; align-self: flex-end; }
+        .ai-msg { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px 20px 20px 0; padding: 12px; max-width: 85%; align-self: flex-start; }
+        .loading-dots:after { content: ' .'; animation: dots 1s steps(5, end) infinite; }
+        @keyframes dots { 0%, 20% { content: ' .'; } 40% { content: ' ..'; } 60% { content: ' ...'; } 80%, 100% { content: ''; } }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="p-4 glass flex justify-between items-center m-2 rounded-2xl">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                <i class="fas fa-robot text-white"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-cyan-400 leading-none">MANSIYA-AI</h1>
+                <span id="status-text" class="text-[9px] text-gray-500 uppercase tracking-widest">Offline</span>
+            </div>
+        </div>
+        <div id="auth-box">
+            <button onclick="login()" class="bg-white text-black px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2">
+               <i class="fab fa-google"></i> Login
+            </button>
+        </div>
+    </header>
+
+    <!-- Chat Window -->
+    <div id="chat-box" class="chat-container flex flex-col gap-4">
+        <div class="ai-msg">
+            <p class="text-[10px] text-cyan-400 font-bold uppercase mb-1">Mansiya AI</p>
+            <p class="text-sm">Namaste! Kripya Google se login karein taaki main aapko pehchan sakoon aur hamari chat save ho sake.</p>
+        </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="p-4 bg-transparent">
+        <div class="max-w-4xl mx-auto flex gap-2 glass p-2 rounded-2xl">
+            <input type="text" id="userInput" placeholder="Ask anything..." class="flex-1 bg-transparent p-3 outline-none text-sm">
+            <button id="sendBtn" class="bg-cyan-500 text-black w-12 h-12 rounded-xl flex items-center justify-center hover:bg-cyan-400 transition">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Admin Floating Button -->
+    <div id="admin-btn" class="hidden fixed bottom-24 right-6">
+        <button onclick="toggleAdmin()" class="bg-red-600 w-12 h-12 rounded-full shadow-2xl flex items-center justify-center border-2 border-white/20">
+            <i class="fas fa-user-shield text-white"></i>
+        </button>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="admin-panel" class="hidden fixed inset-0 bg-black/95 z-50 p-6 overflow-y-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-2xl font-bold text-red-500">ADMIN CONTROL</h2>
+            <button onclick="toggleAdmin()" class="text-white text-3xl">&times;</button>
+        </div>
+        <div class="space-y-6">
+            <div class="glass p-6 rounded-2xl">
+                <h3 class="text-cyan-400 font-bold mb-4 italic">Direct Training</h3>
+                <input type="text" id="train-q" placeholder="Sawal (Question)" class="w-full bg-white/5 border border-white/10 p-3 mb-3 rounded-xl">
+                <textarea id="train-a" placeholder="Jawab (Answer)" class="w-full bg-white/5 border border-white/10 p-3 mb-3 rounded-xl h-24"></textarea>
+                <button onclick="trainAI()" class="w-full bg-cyan-600 p-4 rounded-xl font-bold">Seekhao AI ko</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIG
+        const S_URL = 'https://enstvtympgcnhbbdcdfa.supabase.co';
+        const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVuc3R2dHltcGdjbmhiYmRjZGZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxMzIwNjUsImV4cCI6MjA4ODcwODA2NX0.5fhbAcr0sVeH5xZsd6rOXqxGCn1ADIs0U-zW2J9JMeM';
+        const G_KEY = 'AIzaSyDQfCt6dIqPokdSivlY2uNre-gkzhxdLqM';
+        const T_KEY = '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';
+
+        const supabase = window.supabase.createClient(S_URL, S_KEY);
+        let currentUser = null;
+
+        // Login
+        async function login() {
+            await supabase.auth.signInWithOAuth({ 
+                provider: 'google',
+                options: { redirectTo: window.location.origin }
+            });
+        }
+
+        // Auth Listener
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (session) {
+                currentUser = session.user;
+                document.getElementById('status-text').innerText = "Live Server Active";
+                document.getElementById('status-text').classList.replace('text-gray-500', 'text-green-500');
+                document.getElementById('auth-box').innerHTML = `<img src="${currentUser.user_metadata.avatar_url}" class="w-10 h-10 rounded-full border-2 border-cyan-500">`;
+                
+                // Admin Check (APNA EMAIL YAHAN DALEIN)
+                if(currentUser.email === 'pancardonline51@gmail.com') { // <--- CHANGE THIS
+                    document.getElementById('admin-btn').classList.remove('hidden');
+                }
+                
+                // Welcome Message
+                const chatBox = document.getElementById('chat-box');
+                chatBox.innerHTML = ''; // Clear initial
+                addMsg(`Welcome back, ${currentUser.user_metadata.full_name}! Main taiyar hoon.`, 'ai');
+                loadHistory();
+            }
+        });
+
+        // Send Logic
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if(!text) return;
+
+            input.value = '';
+            addMsg(text, 'user');
+
+            // Thinking State
+            const thinkingDiv = addMsg("Mansiya is thinking", 'ai');
+            thinkingDiv.classList.add('loading-dots');
+
+            try {
+                // 1. Check Training Data
+                const { data: knowledge } = await supabase.from('ai_knowledge').select('*').ilike('question', `%${text}%`);
+                
+                let response = "";
+                if (knowledge && knowledge.length > 0) {
+                    response = knowledge[0].answer;
+                } else {
+                    // 2. Web Search & Gemini
+                    let searchContext = "";
+                    if(text.length > 10) {
+                        const sRes = await fetch('https://api.tavily.com/search', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ api_key: T_KEY, query: text })
+                        });
+                        const sData = await sRes.json();
+                        searchContext = JSON.stringify(sData.results);
+                    }
+
+                    const gRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${G_KEY}`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: `User: ${text}. Context: ${searchContext}. Instructions: You are MANSIYA-AI, friendly, bilingual. Created by Vishal for his family. Be respectful.` }] }]
+                        })
+                    });
+                    const gData = await gRes.json();
+                    response = gData.candidates[0].content.parts[0].text;
+                }
+
+                thinkingDiv.innerText = response;
+                thinkingDiv.classList.remove('loading-dots');
+                saveToDB(text, response);
+
+            } catch (err) {
+                thinkingDiv.innerText = "Error: Check API Keys or Internet.";
+            }
+        }
+
+        // Helper Functions
+        function addMsg(text, sender) {
+            const chatBox = document.getElementById('chat-box');
+            const div = document.createElement('div');
+            div.className = sender === 'user' ? 'user-msg' : 'ai-msg';
+            div.innerHTML = `<p class="text-[9px] ${sender === 'user' ? 'text-white/50' : 'text-cyan-400'} font-bold uppercase mb-1">${sender === 'user' ? 'Aap' : 'Mansiya AI'}</p>
+                             <p class="text-sm">${text}</p>`;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return div.querySelector('.text-sm');
+        }
+
+        async function saveToDB(u, a) {
+            if(!currentUser) return;
+            await supabase.from('messages').insert([{ user_email: currentUser.email, content: u, sender: 'user' }, { user_email: currentUser.email, content: a, sender: 'ai' }]);
+        }
+
+        async function loadHistory() {
+            const { data } = await supabase.from('messages').select('*').eq('user_email', currentUser.email).order('created_at', { ascending: true }).limit(20);
+            if(data) data.forEach(m => addMsg(m.content, m.sender));
+        }
+
+        function toggleAdmin() { document.getElementById('admin-panel').classList.toggle('hidden'); }
+
+        async function trainAI() {
+            const q = document.getElementById('train-q').value;
+            const a = document.getElementById('train-a').value;
+            if(!q || !a) return alert("Dono bhariye!");
+            await supabase.from('ai_knowledge').insert([{ question: q, answer: a }]);
+            alert("Sikh liya!");
+            document.getElementById('train-q').value = '';
+            document.getElementById('train-a').value = '';
+            toggleAdmin();
+        }
+
+        // Event Listeners for Send
+        document.getElementById('sendBtn').addEventListener('click', sendMessage);
+        document.getElementById('userInput').addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') sendMessage();
+        });
+
+    </script>
+</body>
+</html>
