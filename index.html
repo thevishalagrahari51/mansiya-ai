@@ -8,109 +8,93 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
         
-        :root { --primary: #00f2fe; --accent: #4facfe; --bg: #030712; }
-        body { background: var(--bg); color: #e5e7eb; font-family: 'Plus Jakarta Sans', sans-serif; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        body { background: #f0f4f8; color: #1e293b; font-family: 'Outfit', sans-serif; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* Glassmorphism & UI Effects */
-        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .neon-border { border: 1px solid rgba(0, 242, 254, 0.3); box-shadow: 0 0 20px rgba(0, 242, 254, 0.1); }
-        .ai-aura { position: fixed; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(79, 172, 254, 0.15) 0%, transparent 70%); filter: blur(80px); z-index: -1; animation: pulse 8s infinite alternate; }
+        /* Premium Light Theme UI */
+        .glass-header { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
+        .chat-container { background: white; border-radius: 30px 30px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,0.03); }
+        .user-msg { background: #0084ff; color: white; border-radius: 20px 20px 4px 20px; padding: 12px 18px; box-shadow: 0 4px 15px rgba(0, 132, 255, 0.2); }
+        .ai-msg { background: #f1f5f9; color: #334155; border-radius: 20px 20px 20px 4px; padding: 12px 18px; border: 1px solid #e2e8f0; }
         
-        @keyframes pulse { from { transform: translate(-10%, -10%) scale(1); } to { transform: translate(10%, 10%) scale(1.2); } }
-        
-        .chat-scroll::-webkit-scrollbar { width: 4px; }
-        .chat-scroll::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
-        
-        .msg-bubble { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); animation: slideUp 0.4s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .loading-dots span { animation: blink 1.4s infinite both; font-size: 20px; }
-        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes blink { 0% { opacity: 0.2; } 20% { opacity: 1; } 100% { opacity: 0.2; } }
+        .input-bar { background: white; border: 1px solid #e2e8f0; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .send-btn { background: #0084ff; transition: 0.3s; }
+        .send-btn:hover { background: #0073e6; transform: scale(1.05); }
+
+        .loading-dots span { animation: blink 1s infinite; font-weight: bold; }
+        @keyframes blink { 0% { opacity: 0.2; } 50% { opacity: 1; } 100% { opacity: 0.2; } }
     </style>
 </head>
 <body>
-    <div class="ai-aura" style="top: -10%; left: -10%;"></div>
-    <div class="ai-aura" style="bottom: -10%; right: -10%; background: radial-gradient(circle, rgba(0, 242, 254, 0.1) 0%, transparent 70%);"></div>
 
     <!-- Header -->
-    <header class="p-4 glass m-3 rounded-3xl flex justify-between items-center z-10">
-        <div class="flex items-center gap-4">
-            <div class="relative">
-                <div class="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-2xl flex items-center justify-center neon-border">
-                    <i class="fas fa-brain text-white text-xl"></i>
-                </div>
-                <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-4 border-gray-900 rounded-full"></div>
+    <header class="p-4 glass-header flex justify-between items-center z-10">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+                <i class="fas fa-robot text-white text-lg"></i>
             </div>
             <div>
-                <h1 class="text-xl font-bold tracking-tight text-white font-[Orbitron]">MANSIYA<span class="text-cyan-400">AI</span></h1>
-                <p id="status" class="text-[10px] text-gray-500 font-bold tracking-[0.2em] uppercase">System Offline</p>
+                <h1 class="text-lg font-bold text-gray-800">MANSIYA<span class="text-blue-600">AI</span></h1>
+                <div class="flex items-center gap-1.5">
+                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span id="status" class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Live Server</span>
+                </div>
             </div>
         </div>
         <div id="auth-box">
-            <button onclick="login()" class="bg-white text-black px-6 py-2.5 rounded-2xl text-sm font-bold flex items-center gap-2 hover:scale-105 transition-transform active:scale-95">
-                <i class="fab fa-google text-lg"></i> Login
+            <button onclick="login()" class="bg-gray-900 text-white px-5 py-2 rounded-full text-xs font-bold flex items-center gap-2 hover:bg-black transition-all">
+                <i class="fab fa-google"></i> Login
             </button>
         </div>
     </header>
 
-    <!-- Chat Interface -->
-    <div id="chat-box" class="flex-1 overflow-y-auto chat-scroll px-4 py-6 space-y-6 flex flex-col">
-        <div class="ai-msg msg-bubble self-start glass p-4 rounded-3xl rounded-tl-none max-w-[85%] border-l-4 border-cyan-500">
-            <p class="text-[10px] text-cyan-400 font-bold uppercase mb-2">Mansiya Protocol</p>
-            <p class="text-sm leading-relaxed text-gray-200">Namaste! Main MANSIYA hoon, ek smart AI. Kripya Google se login karein taaki main Vishal ji ki memories ko secure rakh sakoon aur aapse seekh sakoon.</p>
+    <!-- Chat Area -->
+    <div id="chat-box" class="flex-1 overflow-y-auto px-4 py-6 space-y-4 flex flex-col chat-container">
+        <div class="ai-msg self-start max-w-[85%]">
+            <p class="text-[10px] text-blue-600 font-bold uppercase mb-1">Mansiya Protocol</p>
+            <p class="text-sm">Namaste! Main MANSIYA hoon. Vishal ji, Varsha ji aur puri family ke liye banayi gayi ek smart AI. Kripya login karein.</p>
         </div>
     </div>
 
     <!-- Input Bar -->
-    <div class="p-6 bg-transparent">
-        <div class="max-w-4xl mx-auto flex gap-3 glass p-2 rounded-3xl neon-border">
-            <input type="text" id="userInput" placeholder="Ask anything, I'm learning..." 
-                   class="flex-1 bg-transparent p-4 outline-none text-sm text-white placeholder-gray-500 font-medium">
-            <button id="sendBtn" class="bg-cyan-500 text-black w-14 h-14 rounded-2xl flex items-center justify-center hover:bg-cyan-400 transition-all shadow-lg shadow-cyan-500/20 active:scale-90">
-                <i class="fas fa-paper-plane text-xl"></i>
+    <div class="p-4 bg-white border-t border-gray-100">
+        <div class="max-w-4xl mx-auto flex gap-2 input-bar p-1.5 pl-4">
+            <input type="text" id="userInput" placeholder="Ask MANSIYA something..." 
+                   class="flex-1 bg-transparent p-3 outline-none text-sm text-gray-700">
+            <button id="sendBtn" class="send-btn text-white w-12 h-12 rounded-full flex items-center justify-center shadow-md">
+                <i class="fas fa-paper-plane"></i>
             </button>
         </div>
-        <p class="text-center text-[9px] text-gray-600 mt-4 tracking-widest uppercase font-bold">Encrypted via Supabase & Gemini Pro | Admin: Vishal</p>
+        <p class="text-center text-[10px] text-gray-400 mt-3 font-medium">Safe & Secure | Powered by Vishal</p>
     </div>
 
-    <!-- Admin Floating Interface -->
-    <div id="admin-btn" class="hidden fixed bottom-28 right-8 z-20">
-        <button onclick="toggleAdmin()" class="bg-red-500/20 hover:bg-red-500/40 w-14 h-14 rounded-2xl flex items-center justify-center border border-red-500/50 backdrop-blur-md transition-all shadow-2xl">
-            <i class="fas fa-shield-halved text-red-500 text-xl"></i>
+    <!-- Admin Button -->
+    <div id="admin-btn" class="hidden fixed bottom-24 right-6">
+        <button onclick="toggleAdmin()" class="bg-red-500 w-12 h-12 rounded-full shadow-xl flex items-center justify-center border-2 border-white">
+            <i class="fas fa-shield-alt text-white text-lg"></i>
         </button>
     </div>
 
-    <!-- Admin Modal -->
-    <div id="admin-panel" class="hidden fixed inset-0 bg-gray-950/95 z-50 p-6 backdrop-blur-xl overflow-y-auto">
-        <div class="max-w-2xl mx-auto">
-            <div class="flex justify-between items-center mb-10">
-                <h2 class="text-2xl font-bold text-red-500 font-[Orbitron]">ADMIN CORE</h2>
-                <button onclick="toggleAdmin()" class="text-gray-400 text-4xl hover:text-white">&times;</button>
+    <!-- Admin Panel -->
+    <div id="admin-panel" class="hidden fixed inset-0 bg-white z-50 p-6 overflow-y-auto">
+        <div class="max-w-xl mx-auto">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-xl font-bold text-gray-800">Admin Control Panel</h2>
+                <button onclick="toggleAdmin()" class="text-gray-400 text-4xl">&times;</button>
             </div>
             
-            <div class="glass p-8 rounded-3xl border-red-500/20">
-                <h3 class="text-cyan-400 font-bold mb-6 flex items-center gap-2 uppercase tracking-wider">
-                    <i class="fas fa-microchip"></i> Training Neural Network
-                </h3>
-                <div class="space-y-4">
-                    <input type="text" id="train-q" placeholder="Enter Question Pattern..." 
-                           class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-white outline-none focus:border-cyan-500">
-                    <textarea id="train-a" placeholder="Enter Ideal AI Response..." 
-                              class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-white outline-none focus:border-cyan-500 h-32"></textarea>
-                    <button onclick="trainAI()" class="w-full bg-gradient-to-r from-cyan-600 to-blue-700 p-4 rounded-2xl font-black uppercase tracking-widest text-white hover:brightness-110 transition-all">
-                        Commit to Memory
-                    </button>
-                </div>
+            <div class="bg-gray-50 p-6 rounded-3xl border border-gray-100">
+                <h3 class="text-blue-600 font-bold mb-4 uppercase text-xs">AI Knowledge Base</h3>
+                <input type="text" id="train-q" placeholder="Enter Question" class="w-full bg-white border border-gray-200 p-4 rounded-2xl mb-3 outline-none">
+                <textarea id="train-a" placeholder="Enter Answer" class="w-full bg-white border border-gray-200 p-4 rounded-2xl mb-3 outline-none h-32"></textarea>
+                <button onclick="trainAI()" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-bold hover:bg-blue-700 transition-all">Seekhao AI ko</button>
             </div>
         </div>
     </div>
 
     <script>
-        // CORE CONFIGURATION
+        // CONFIG
         const S_URL = 'https://enstvtympgcnhbbdcdfa.supabase.co';
         const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVuc3R2dHltcGdjbmhiYmRjZGZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxMzIwNjUsImV4cCI6MjA4ODcwODA2NX0.5fhbAcr0sVeH5xZsd6rOXqxGCn1ADIs0U-zW2J9JMeM';
         const G_KEY = 'AIzaSyDQfCt6dIqPokdSivlY2uNre-gkzhxdLqM';
@@ -119,7 +103,6 @@
         const supabase = window.supabase.createClient(S_URL, S_KEY);
         let currentUser = null;
 
-        // AUTH LOGIC
         async function login() {
             await supabase.auth.signInWithOAuth({ 
                 provider: 'google',
@@ -130,27 +113,17 @@
         supabase.auth.onAuthStateChange((event, session) => {
             if (session) {
                 currentUser = session.user;
-                document.getElementById('status').innerText = "Live System Active";
-                document.getElementById('status').className = "text-[10px] text-cyan-400 font-bold tracking-[0.2em] uppercase";
-                document.getElementById('auth-box').innerHTML = `
-                    <div class="flex items-center gap-3 glass p-1.5 pr-4 rounded-2xl border-cyan-500/30">
-                        <img src="${currentUser.user_metadata.avatar_url}" class="w-10 h-10 rounded-xl">
-                        <span class="text-xs font-bold text-gray-300 hidden md:block">${currentUser.user_metadata.full_name}</span>
-                    </div>`;
-                
-                // ADMIN EMAIL CHECK
+                document.getElementById('auth-box').innerHTML = `<img src="${currentUser.user_metadata.avatar_url}" class="w-10 h-10 rounded-full ring-2 ring-blue-500">`;
                 if(currentUser.email === 'pancardonline51@gmail.com') { 
                     document.getElementById('admin-btn').classList.remove('hidden');
                 }
-                
                 const chatBox = document.getElementById('chat-box');
                 chatBox.innerHTML = ''; 
-                addMsg(`Welcome back, ${currentUser.user_metadata.full_name.split(' ')[0]} ji! How can MANSIYA assist you today?`, 'ai');
+                addMsg(`Welcome back, ${currentUser.user_metadata.full_name}!`, 'ai');
                 loadHistory();
             }
         });
 
-        // CHAT ENGINE
         async function sendMessage() {
             const input = document.getElementById('userInput');
             const text = input.value.trim();
@@ -159,19 +132,18 @@
             input.value = '';
             addMsg(text, 'user');
 
-            const thinkingDiv = addMsg(`<div class="loading-dots">Searching Neural Pathways<span>.</span><span>.</span><span>.</span></div>`, 'ai');
+            const thinkingDiv = addMsg(`<span>.</span><span>.</span><span>.</span>`, 'ai');
+            thinkingDiv.classList.add('loading-dots');
 
             try {
-                // 1. BRAIN CHECK (Knowledge DB)
                 const { data: knowledge } = await supabase.from('ai_knowledge').select('*').ilike('question', `%${text}%`);
                 
                 let response = "";
                 if (knowledge && knowledge.length > 0) {
                     response = knowledge[0].answer;
                 } else {
-                    // 2. WEB SEARCH PROTOCOL
                     let searchContext = "";
-                    if(text.length > 8) {
+                    if(text.length > 5) {
                         try {
                             const sRes = await fetch('https://api.tavily.com/search', {
                                 method: 'POST',
@@ -180,15 +152,14 @@
                             });
                             const sData = await sRes.json();
                             searchContext = JSON.stringify(sData.results);
-                        } catch(e) { console.log("Search failed, proceeding with brain."); }
+                        } catch(e) {}
                     }
 
-                    // 3. GENERATIVE AI (Gemini)
                     const gRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${G_KEY}`, {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({
-                            contents: [{ parts: [{ text: `System: You are MANSIYA-AI, a highly intelligent bilingual assistant created by Vishal for his family (Wife: Varsha, Children: Mansi, Siya). User message: ${text}. Search Results: ${searchContext}. Be friendly, respect Privacy, and use Hindi/English as needed.` }] }]
+                            contents: [{ parts: [{ text: `System: You are MANSIYA-AI, friendly bilingual assistant. Created by Vishal. Context: ${searchContext}. User Question: ${text}.` }] }]
                         })
                     });
                     const gData = await gRes.json();
@@ -196,23 +167,19 @@
                 }
 
                 thinkingDiv.innerHTML = response;
+                thinkingDiv.classList.remove('loading-dots');
                 saveToDB(text, response);
 
             } catch (err) {
-                thinkingDiv.innerText = "Connection Interrupted. Please check network.";
+                thinkingDiv.innerText = "Error Connecting to Server.";
             }
         }
 
-        // UTILITIES
         function addMsg(text, sender) {
             const chatBox = document.getElementById('chat-box');
             const div = document.createElement('div');
-            div.className = sender === 'user' ? 'self-end max-w-[85%] mb-4' : 'self-start max-w-[85%] mb-4';
-            div.innerHTML = `
-                <div class="${sender === 'user' ? 'bg-cyan-600/20 border border-cyan-500/30 rounded-3xl rounded-tr-none' : 'glass border-l-4 border-cyan-500 rounded-3xl rounded-tl-none'} p-4 msg-bubble">
-                    <p class="text-[9px] ${sender === 'user' ? 'text-cyan-400' : 'text-cyan-400'} font-black uppercase mb-1">${sender === 'user' ? 'User Identity' : 'Mansiya AI'}</p>
-                    <p class="text-sm leading-relaxed">${text}</p>
-                </div>`;
+            div.className = sender === 'user' ? 'user-msg self-end max-w-[85%]' : 'ai-msg self-start max-w-[85%]';
+            div.innerHTML = `<p class="text-[9px] font-bold uppercase mb-1 ${sender === 'user' ? 'text-blue-100' : 'text-blue-600'}">${sender === 'user' ? 'Aap' : 'Mansiya AI'}</p><p class="text-sm">${text}</p>`;
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
             return div.querySelector('.text-sm');
@@ -233,15 +200,12 @@
         async function trainAI() {
             const q = document.getElementById('train-q').value;
             const a = document.getElementById('train-a').value;
-            if(!q || !a) return alert("All fields required.");
+            if(!q || !a) return alert("Dono bhariye");
             await supabase.from('ai_knowledge').insert([{ question: q, answer: a }]);
-            alert("Neural Memory Updated Successfully!");
-            document.getElementById('train-q').value = '';
-            document.getElementById('train-a').value = '';
+            alert("Memory Updated!");
             toggleAdmin();
         }
 
-        // EVENT HANDLERS
         document.getElementById('sendBtn').addEventListener('click', sendMessage);
         document.getElementById('userInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
     </script>
